@@ -23,8 +23,9 @@ $output = curl_exec($ch);
 // close curl resource to free up system resources
 curl_close($ch);  
 //echo $output;  
-separa_cartas($output);
+$deck = separa_cartas($output);
 
+var_dump(json_encode($deck));
 }
 
 
@@ -34,31 +35,48 @@ function separa_cartas($output){
     $re = '/\<tbody\>(.*?)\<\/tbody\>/m';
     preg_match_all($re, $output, $matches, PREG_SET_ORDER, 0);
     $deck = $matches[0][0];
-    separa_linha($deck);
+    $deckstats = separa_linha($deck);
+    return $deckstats;
 
 }
 
 
 
 function separa_linha($deck){
-    $cardnames = [];
+    $deckstats = [];
     $re = '/\<tr\>(.*?)\<\/tr\>/m';
     preg_match_all($re, $deck, $matches, PREG_SET_ORDER, 0);
     foreach ($matches as $key => $value) {
-        separa_coluna($value[0]);
-        die();
+        $card = separa_coluna($value[0]);
+        if( $card != false){
+            $deckstats[] = $card;
+        }
+        
     }
+    return $deckstats;
 }
 
 function separa_coluna($deck){
-    $cardnames = [];
     $re = '/\<td(.*?)\<\/td\>/m';
     preg_match_all($re, $deck, $matches, PREG_SET_ORDER, 0);
-    foreach ($matches as $key => $value) {
-        echo count ($matches)."\n";
-        var_dump($key,$value[0]);
-        die();
+    if(count ($matches) == 1){
+        return false;
     }
+    else{
+        
+        $quanty = (preg_replace("/[^0-9]/", '', strip_tags($matches[0][0])));
+        $name = separa_nome_carta($matches[1][0]);
+        $return['quanty'] = $quanty;
+        $return['name'] = $name;
+        return $return;
+    }
+   
+}
+
+function separa_nome_carta($linha){
+    $re = '/href=".\/\?view=cards\/card&card=(.*?)">/m';
+    preg_match_all($re, $linha, $matches, PREG_SET_ORDER, 0);
+    return (trim($matches[0][1]));
 }
 
 ?>
