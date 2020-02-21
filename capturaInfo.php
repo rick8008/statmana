@@ -22,6 +22,7 @@ function captura_deck($url){
     foreach ($deck as $key => $value) {
         captura_dados_carta($value['name']);
     }
+    return $deck;
 
 }
 
