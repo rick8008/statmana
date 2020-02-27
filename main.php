@@ -52,56 +52,20 @@ function determine_color_lands($estatistica){
 
 //dont ask me how i did it !
 function combinations_color_lands($color_lands,$land_num){
-    $combinacao = [];
-    $lands = $land_num;
-    $i = 0;
-    $initial_combination = [];
-    $legenda= [];
-    foreach ($color_lands as $key => $color) {
-        if($i == 0){
-            $initial_combination[$i] = $land_num-count($color_lands)-1;
-            
-        }else{
-            $initial_combination[$i] = 1;
-        }
-        $legenda[$i] = $color;
-        $i++;
-    }
-    $combinacao[] =  $initial_combination;
-    $done = false;
-    $colorspipe = count($initial_combination);
-    
-    $i2 = 0;
-    $fim = false;
-    $done = false;
-    while($done == false){
-        $fim = false;
-        while($fim == false){
-            if( $initial_combination[$i2] > 1 and isset($initial_combination[$i2+1]) ){
-                $initial_combination[$i2+1]++;
-                $initial_combination[$i2]--;
-                $combinacao[] =  $initial_combination;
-            }else{
-                $fim= true; 
+    $array_elems_to_combine = $color_lands;
+    $size = $land_num;
+    $current_set = array('');
+
+    for ($i = 0; $i < $size; $i++) {
+        $tmp_set = array();
+        foreach ($current_set as $curr_elem) {
+            foreach ($array_elems_to_combine as $new_elem) {
+                $tmp_set[] = $curr_elem . $new_elem;
             }
-            
-            
         }
-        $i2++;
-        if($i2 >$colorspipe){
-            $done = true;
-        }
+        $current_set = $tmp_set;
     }
-    var_dump($combinacao);
-    die();
-        
-
-    
-
-
-
-
-    
+    var_dump( $current_set);
     die();
 }
 
