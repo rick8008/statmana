@@ -31,6 +31,17 @@ function captura_deck($url){
 function captura_dados_carta($name){
     $card_name_cache = str_replace(' ','_',$name);
     $card_name_cache = str_replace('/','|',$card_name_cache);
+
+
+    $re = '/\(\#(.*?)\)/m';
+    preg_match_all($re, $card_name_cache, $matches, PREG_SET_ORDER, 0);
+    if(count($matches) >=1 ){
+        $card_name_cache = str_replace('_'.$matches[0][0],'',$card_name_cache);
+        $name = str_replace(' '.$matches[0][0],'',$name);
+    }
+    
+
+
     $cache = file_exists('cache/'.$card_name_cache.'.json');
     if(!$cache){
         $url_card = 'https://api.scryfall.com/cards/named?exact='.urlencode($name);
