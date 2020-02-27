@@ -33,7 +33,7 @@ function captura_dados_carta($name){
     $card_name_cache = str_replace('/','|',$card_name_cache);
     $cache = file_exists('cache/'.$card_name_cache.'.json');
     if(!$cache){
-        $url_card = 'https://api.scryfall.com/cards/search?q='.urlencode($name);
+        $url_card = 'https://api.scryfall.com/cards/named?exact='.urlencode($name);
 
         $ch = curl_init();
     
