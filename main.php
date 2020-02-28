@@ -12,7 +12,7 @@ include 'capturaEstatistica.php';
 
 
 
-$url = "https://www.ligamagic.com.br/?view=dks/deck&id=1436263";
+$url = "https://www.ligamagic.com.br/?view=dks/deck&id=1572279";
 
 
 $deck = captura_deck($url);
@@ -52,22 +52,76 @@ function determine_color_lands($estatistica){
 
 //dont ask me how i did it !
 function combinations_color_lands($color_lands,$land_num){
-    $array_elems_to_combine = $color_lands;
-    $size = $land_num;
-    $current_set = array('');
-
-    for ($i = 0; $i < $size; $i++) {
-        $tmp_set = array();
-        foreach ($current_set as $curr_elem) {
-            foreach ($array_elems_to_combine as $new_elem) {
-                $tmp_set[] = $curr_elem . $new_elem;
+    $initial = '';
+    $land_num=$land_num;
+    $possibilidade = [];
+    $legenda = [];
+    $i = 0;
+    foreach ($color_lands as $key => $color) {
+        if($i == 0){
+            for ($i2=0; $i2 < $land_num - count($color_lands)+1 ; $i2++) { 
+                $initial= $initial.$i;
             }
+        }else{
+            $initial = $initial.$i;
         }
-        $current_set = $tmp_set;
+        $i++;
+        $legenda[] = $color;
     }
-    var_dump( $current_set);
-    die();
+    $possibilidade[] = $initial;
+    $done = false;
+    $possibilidade = next_possibiliti($initial);
+    $pronto = possibiliti_to_options( $possibilidade,$legenda);
+    file_put_contents('combination.json',json_encode($pronto));
 }
+
+
+
+function next_possibiliti($string,$possibilities = []){
+   
+    $end = false;
+    $initial_array = str_split($string);
+    $pre_possibiliti = [];
+    if(count($possibilities) == 0){
+        $possibilities[]=$string;
+    }
+    foreach ($initial_array as $key => $value) {0
+        if(isset($initial_array[$key+1]) and $value != $initial_array[$key+1]){
+
+            if(isset($initial_array[$key-1]) and $value == $initial_array[$key-1]){
+                $pre_possibiliti = $initial_array;
+                $pre_possibiliti[$key] = $pre_possibiliti[$key+1];
+                if(!in_array(implode('',$pre_possibiliti),$possibilities)){
+                    $possibilities[] = implode('',$pre_possibiliti);
+                    echo implode('',$pre_possibiliti)."\n";
+                    $possibilities =  next_possibiliti(implode('',$pre_possibiliti),$possibilities);
+                }
+                
+            }
+            
+             
+        }
+    }
+    
+    return $possibilities;
+   
+}
+
+
+function possibiliti_to_options($possibilidade,$legenda){
+    $return = [];
+    foreach ($possibilidade as $key => $value) {
+        $colors = [];
+        foreach ($legenda as $key2 => $value2) {
+            $num = substr_count($value,$key2);
+            $colors[$value2] = $num;
+        }
+        $return[]=$colors;
+    }
+    return $return;
+
+}
+
 
 
 ?>
