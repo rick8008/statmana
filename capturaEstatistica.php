@@ -55,25 +55,28 @@ function captura_estatisticas($deck){
 
         }
     }
-    //echo "\n\n";
-    //echo "quantidade de terrenos : ".$lands."\n\n" ;
-    //echo "devoção :\n" ;
-    //echo "  red : ".$devotion['r']."\n";
-    //echo "  wite : ".$devotion['w']."\n";
-    //echo "  blue : ".$devotion['u']."\n";
-    //echo "  green : ".$devotion['g']."\n";
-    //echo "  black : ".$devotion['b']."\n\n";
-    //echo "curva de mana\n";
+    $output = '';
+    $output = "\n\n";
+    $output = "quantidade de terrenos : ".$lands."\n\n" ;
+    $output = "devoção :\n" ;
+    $output = "  red : ".$devotion['r']."\n";
+    $output = "  wite : ".$devotion['w']."\n";
+    $output = "  blue : ".$devotion['u']."\n";
+    $output = "  green : ".$devotion['g']."\n";
+    $output = "  black : ".$devotion['b']."\n\n";
+    $output = "curva de mana\n";
     ksort($mana_curve);
     foreach ($mana_curve as $key => $value) {
-        //echo "  ".$key." : ".$value."\n";
+        $output = "  ".$key." : ".$value."\n";
         ksort($mana_curve_by_color[$key]);
         foreach($mana_curve_by_color[$key] as $key2 => $value2){
-            //echo "      ".$key2." : ".$value2."\n";
+            $output = "      ".$key2." : ".$value2."\n";
         }
     }
 
-    //echo "\n\n";
+    $output = "\n\n";
+
+    file_put_contents('analise.txt',$output);
     $return['devotion'] = $devotion;
     $return['lands'] = $lands;
     $return['mana_curve'] = $mana_curve;
