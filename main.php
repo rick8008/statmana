@@ -70,20 +70,23 @@ function combinations_color_lands($color_lands,$land_num){
     }
     $possibilidade[] = $initial;
     $done = false;
-    $possibilidade = next_possibiliti($initial);
+    $filename = count($color_lands)."colors_".$land_num."lands.txt";
+    $possibilidade = next_possibiliti($initial,$filename);
     $pronto = possibiliti_to_options( $possibilidade,$legenda);
     file_put_contents('combination.json',json_encode($pronto));
 }
 
 
 
-function next_possibiliti($string,$possibilities = []){
+function next_possibiliti($string,$filename,$possibilities = []){
    
     $end = false;
     $initial_array = str_split($string);
     $pre_possibiliti = [];
+    $combination_file_name = $filename;
     if(count($possibilities) == 0){
         $possibilities[]=$string;
+        file_put_contents($combination_file_name,$string."\n",FILE_APPEND);
     }
     foreach ($initial_array as $key => $value) {
         if(isset($initial_array[$key+1]) and $value != $initial_array[$key+1]){
@@ -93,8 +96,9 @@ function next_possibiliti($string,$possibilities = []){
                 $pre_possibiliti[$key] = $pre_possibiliti[$key+1];
                 if(!in_array(implode('',$pre_possibiliti),$possibilities)){
                     $possibilities[] = implode('',$pre_possibiliti);
-                    echo implode('',$pre_possibiliti)."\n";
-                    $possibilities =  next_possibiliti(implode('',$pre_possibiliti),$possibilities);
+                    file_put_contents($combination_file_name,implode('',$pre_possibiliti)."\n",FILE_APPEND);
+                    //echo implode('',$pre_possibiliti)."\n";
+                    $possibilities =  next_possibiliti(implode('',$pre_possibiliti),$filename,$possibilities);
                 }
                 
             }
