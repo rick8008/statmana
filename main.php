@@ -85,7 +85,7 @@ function next_possibiliti($string,$possibilities = []){
     if(count($possibilities) == 0){
         $possibilities[]=$string;
     }
-    foreach ($initial_array as $key => $value) {0
+    foreach ($initial_array as $key => $value) {
         if(isset($initial_array[$key+1]) and $value != $initial_array[$key+1]){
 
             if(isset($initial_array[$key-1]) and $value == $initial_array[$key-1]){
