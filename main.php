@@ -14,7 +14,6 @@ include 'capturaEstatistica.php';
 
 $url = "https://www.ligamagic.com.br/?view=dks/deck&id=1572279";
 
-
 $deck = captura_deck($url);
 $estatistica = captura_estatisticas($deck);
 determine_color_lands($estatistica);
@@ -31,99 +30,49 @@ function determine_color_lands($estatistica){
 
     $land_colors = [];
     if($estatistica["devotion"]["r"] >= 1){
-        $land_colors[] = 'r';
+        $land_colors[] = ['cor'  => 'r', 'quantidade'=> 0 ];
     } 
     if($estatistica["devotion"]["g"] >= 1){
-        $land_colors[] = 'g';
+        $land_colors[] = ['cor'  => 'g', 'quantidade'=> 0 ];
     } 
     if($estatistica["devotion"]["u"] >= 1){
-        $land_colors[] = 'u';
+        $land_colors[] = ['cor'  => 'u', 'quantidade'=> 0 ];
     } 
     if($estatistica["devotion"]["b"] >= 1){
-        $land_colors[] = 'b';
+        $land_colors[] = ['cor'  => 'b', 'quantidade'=> 0 ];
     } 
     if($estatistica["devotion"]["w"] >= 1){
-        $land_colors[] = 'w';
+        $land_colors[] = ['cor'  => 'w', 'quantidade'=> 0 ];
     } 
-    combinations_color_lands($land_colors,$estatistica["lands"]);
-
-}
-
-
-//dont ask me how i did it !
-function combinations_color_lands($color_lands,$land_num){
-    $initial = '';
-    $land_num=$land_num;
-    $possibilidade = [];
-    $legenda = [];
-    $i = 0;
-    foreach ($color_lands as $key => $color) {
-        if($i == 0){
-            for ($i2=0; $i2 < $land_num - count($color_lands)+1 ; $i2++) { 
-                $initial= $initial.$i;
-            }
-        }else{
-            $initial = $initial.$i;
-        }
-        $i++;
-        $legenda[] = $color;
-    }
-    $possibilidade[] = $initial;
-    $done = false;
-    $filename = count($color_lands)."colors_".$land_num."lands.txt";
-    $possibilidade = next_possibiliti($initial,$filename);
-    $pronto = possibiliti_to_options( $possibilidade,$legenda);
-    file_put_contents('combination.json',json_encode($pronto));
-}
-
-
-
-function next_possibiliti($string,$filename,$possibilities = []){
-   
-    $end = false;
-    $initial_array = str_split($string);
-    $pre_possibiliti = [];
-    $combination_file_name = $filename;
-    if(count($possibilities) == 0){
-        $possibilities[]=$string;
-        file_put_contents($combination_file_name,$string."\n",FILE_APPEND);
-    }
-    foreach ($initial_array as $key => $value) {
-        if(isset($initial_array[$key+1]) and $value != $initial_array[$key+1]){
-
-            if(isset($initial_array[$key-1]) and $value == $initial_array[$key-1]){
-                $pre_possibiliti = $initial_array;
-                $pre_possibiliti[$key] = $pre_possibiliti[$key+1];
-                if(!in_array(implode('',$pre_possibiliti),$possibilities)){
-                    $possibilities[] = implode('',$pre_possibiliti);
-                    file_put_contents($combination_file_name,implode('',$pre_possibiliti)."\n",FILE_APPEND);
-                    //echo implode('',$pre_possibiliti)."\n";
-                    $possibilities =  next_possibiliti(implode('',$pre_possibiliti),$filename,$possibilities);
-                }
-                
-            }
-            
-             
-        }
-    }
     
-    return $possibilities;
-   
+    recursive($land_colors, count($land_colors) - 1, $estatistica["lands"],$estatistica["lands"],count($land_colors).'color_'.$estatistica["lands"]."lands.txt");
 }
 
 
-function possibiliti_to_options($possibilidade,$legenda){
-    $return = [];
-    foreach ($possibilidade as $key => $value) {
-        $colors = [];
-        foreach ($legenda as $key2 => $value2) {
-            $num = substr_count($value,$key2);
-            $colors[$value2] = $num;
-        }
-        $return[]=$colors;
-    }
-    return $return;
-
+function recursive($cores, $index, $manas_restantes ,$manas_totais,$filename){
+	
+	for($i = $manas_restantes; $i >= 0; $i--){
+		$cores[$index]['quantidade'] = $i;
+		if($index == 0){
+			$total = array_sum(array_column($cores, 'quantidade'));
+			if($total == $manas_totais){
+                $valido = true;
+                
+                foreach ($cores as $key => $value) {
+                    if( $value["quantidade"] == 0){
+                        $valido = false;
+                    }
+                }
+                if($valido){
+                    $linha = implode( ', ' , array_map(function($item) { return implode( ': ' , $item); }, $cores));
+                    file_put_contents($filename,$linha."\n",FILE_APPEND);
+                }
+				
+			}
+		}else{
+			recursive($cores, $index - 1, $manas_restantes - $i, $manas_totais,$filename);
+		}
+	}
 }
 
 
