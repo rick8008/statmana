@@ -18,7 +18,7 @@ function captura_deck($url){
     curl_close($ch);  
     //echo $output;  
     $deck = separa_cartas($output);
-    file_put_contents('deck.json',json_encode($deck));
+    file_put_contents('tmp/deck.json',json_encode($deck));
     foreach ($deck as $key => $value) {
         captura_dados_carta($value['name']);
     }

@@ -76,7 +76,7 @@ function captura_estatisticas($deck){
 
     $output = "\n\n";
 
-    file_put_contents('analise.txt',$output);
+    file_put_contents('tmp/analise.txt',$output);
     $return['devotion'] = $devotion;
     $return['lands'] = $lands;
     $return['mana_curve'] = $mana_curve;
