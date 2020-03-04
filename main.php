@@ -19,7 +19,107 @@ $url = "https://www.ligamagic.com.br/?view=dks/deck&id=1572279";
 $deck = captura_deck($url);
 $estatistica = captura_estatisticas($deck);
 $possibilidades_land = determine_color_lands($estatistica);
-emula_deck($deck,$possibilidades_land,$estatistica);
+$index_decks = emula_deck($deck,$possibilidades_land,$estatistica);
+emulate_heand($index_decks);
+
+
+
+
+
+
+function emulate_heand($possibilidades){
+    $i = 1;
+    while ($i < $possibilidades) {
+        $deck = file_get_contents('allDecks/deck_possibiliti_'.$i.'.txt');
+        $deck = json_decode($deck,true);
+        $heandIndex = array_rand($deck["cards"],17);
+        $heand = [];
+        $draw = [];
+        $i2=0;
+        foreach ($heandIndex as $key => $value) {
+            if($i2 <7){
+                $heand[] = $deck["cards"][$value];
+            }else{
+                $draw[] = $deck["cards"][$value];
+            }
+            $i2++;
+        }
+        score_heand($heand,$draw,$deck["commander"]);
+       
+    }
+
+}
+
+
+function score_heand($heand,$draw,$commander){
+
+    $land_sorcer= [];
+    foreach ($heand as $key => $value) {
+        if($value["land"]){
+            if(isset($land_sorcer[get_color_lands($value["identity"])])){
+                $land_sorcer[get_color_lands($value["identity"])] = $land_sorcer[get_color_lands($value["identity"])]+1;
+            }else{
+                $land_sorcer[get_color_lands($value["identity"])]=1;
+            }      
+        }else{
+            $card_infos = get_color_cards_sorce($value["identity"]);
+            var_dump($card_infos);
+        }
+       
+    }
+}
+
+
+
+
+function get_color_cards_sorce($card){
+
+    $return['r'] = intval(substr_count($card,'{R}'));
+    $return['w'] = intval(substr_count($card,'{W}'));
+    $return['u'] = intval(substr_count($card,'{U}'));
+    $return['g'] = intval(substr_count($card,'{G}'));
+    $return['b'] = intval(substr_count($card,'{B}'));
+
+    $re = '/{([0-9]+)}/m';
+    preg_match_all($re, $card, $matches, PREG_SET_ORDER, 0);
+    
+    // Print the entire match result
+    if(isset($matches[0][1])){
+        $return['cost'] = $matches[0][1]+substr_count($card,'{R}')+substr_count($card,'{W}')+substr_count($card,'{U}')+substr_count($card,'{G}')+substr_count($card,'{B}');
+    }else{
+        $return['cost'] = 0+substr_count($card,'{R}')+substr_count($card,'{W}')+substr_count($card,'{U}')+substr_count($card,'{G}')+substr_count($card,'{B}');
+    }
+ 
+    return  $return;
+}
+
+
+
+function get_color_lands($land){
+    switch ($land) {
+        case '{W}':
+            return 'w';
+            break;
+        case '{R}':
+            return 'r';
+            break;
+        case '{B}':
+            return 'b';
+            break;
+        case '{R}':
+            return 'r';
+            break;
+        case '{U}':
+            return 'u';
+            break;
+    
+        default:
+            return '';
+            break;
+    }
+
+}
+
 
 
 
@@ -48,7 +148,7 @@ function emula_deck($deck,$possibilidades_land,$estatistica){
         }
         
     }
-   
+   return $index_deck-1;
 
     
 }
