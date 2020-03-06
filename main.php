@@ -54,9 +54,9 @@ function emulate_heand($possibilidades){
 
         $final_score = trata_score($score);
         $json = json_encode($final_score);
-       var_dump( $final_score);
-       die(); 
-        
+        file_put_contents('allHeands/heand_score_'.$i.'.txt',json_encode($json));
+        echo $i.' possibility verified'."\n";
+        $i++;
     }
 }
 
