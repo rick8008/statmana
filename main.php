@@ -29,44 +29,159 @@ emulate_heand($index_decks);
 
 function emulate_heand($possibilidades){
     $i = 1;
+    
     while ($i < $possibilidades) {
         $deck = file_get_contents('allDecks/deck_possibiliti_'.$i.'.txt');
         $deck = json_decode($deck,true);
-        $heandIndex = array_rand($deck["cards"],17);
-        $heand = [];
-        $draw = [];
-        $i2=0;
-        foreach ($heandIndex as $key => $value) {
-            if($i2 <7){
-                $heand[] = $deck["cards"][$value];
-            }else{
-                $draw[] = $deck["cards"][$value];
+        $i3 = 1;
+        $score = [];
+        while ($i3 < 10000) {
+            $heandIndex = array_rand($deck["cards"],17);
+            $heand = [];
+            $draw = [];
+            $i2=0;
+            foreach ($heandIndex as $key => $value) {
+                if($i2 <7){
+                    $heand[] = $deck["cards"][$value];
+                }else{
+                    $draw[] = $deck["cards"][$value];
+                }
+                $i2++;
             }
-            $i2++;
+            $score[] = score_heand($heand,$draw,$deck["commander"]);
+            $i3++;
         }
-        score_heand($heand,$draw,$deck["commander"]);
-       
-    }
 
+        $final_score = trata_score($score);
+        $json = json_encode($final_score);
+       var_dump( $final_score);
+       die(); 
+        
+    }
 }
 
 
+function trata_score($score) {
+    $media_land = 0;
+    $moda_land = [];
+
+    $media_can_cast = 0;
+    $moda_can_cast = [];
+
+    $media_cant_cast = 0;
+    $moda_cant_cast = [];
+
+    foreach ($score as $key => $value) {
+        $media_land = $media_land+$value["lands"];
+        $moda_land[$value["lands"]] = (isset($moda_land[$value["lands"]])?$moda_land[$value["lands"]]:0)+1;
+
+        $media_can_cast = $media_can_cast+$value["can_cast_how_mutch"];
+        $moda_can_cast[$value["can_cast_how_mutch"]] = (isset($moda_can_cast[$value["can_cast_how_mutch"]])?$moda_can_cast[$value["can_cast_how_mutch"]]:0)+1;
+
+        $media_cant_cast = $media_cant_cast+$value["cant_cast_how_mutch"];
+        $moda_cant_cast[$value["cant_cast_how_mutch"]] = (isset($moda_cant_cast[$value["cant_cast_how_mutch"]])?$moda_cant_cast[$value["cant_cast_how_mutch"]]:0)+1; 
+    }
+    
+
+    $return['media_land'] = $media_land/count($score);
+    $return['media_can_cast'] = $media_can_cast/count($score);
+    $return['media_cant_cast'] = $media_cant_cast/count($score);
+    $return['moda_land'] = retur_moda($moda_land);
+    $return['moda_can_cast'] = retur_moda($moda_can_cast);
+    $return['moda_cant_cast'] = retur_moda($moda_cant_cast);
+    return $return;
+}
+
+
+function retur_moda($array){
+    $return = [];
+    arsort($array);
+    foreach ($array as $key => $value) {
+        if(end($array) == $value ){
+            $return[] =  $key;
+        }
+    }
+
+    return implode(', ',$return);
+}
 function score_heand($heand,$draw,$commander){
 
     $land_sorcer= [];
+    $land_on_headn = 0;
+    $heand_max_cost = [
+        "r" =>0,
+        "b" =>0,
+        "g" =>0,
+        "u" =>0,
+        "w" =>0,
+        "cost" =>0
+    ];
+    $cards = [];
     foreach ($heand as $key => $value) {
         if($value["land"]){
             if(isset($land_sorcer[get_color_lands($value["identity"])])){
                 $land_sorcer[get_color_lands($value["identity"])] = $land_sorcer[get_color_lands($value["identity"])]+1;
             }else{
                 $land_sorcer[get_color_lands($value["identity"])]=1;
-            }      
+            }   
+            $land_on_headn++;   
         }else{
             $card_infos = get_color_cards_sorce($value["identity"]);
-            var_dump($card_infos);
+            $cards[] = $card_infos;
+            if($heand_max_cost['r'] < $card_infos['r']  ){
+                $heand_max_cost['r'] = $card_infos['r'];
+            }
+            if($heand_max_cost['b'] < $card_infos['b']  ){
+                $heand_max_cost['b'] = $card_infos['b'];
+            }
+            if($heand_max_cost['g'] < $card_infos['g']  ){
+                $heand_max_cost['g'] = $card_infos['g'];
+            }
+            if($heand_max_cost['u'] < $card_infos['u']  ){
+                $heand_max_cost['u'] = $card_infos['u'];
+            }
+            if($heand_max_cost['w'] < $card_infos['w']  ){
+                $heand_max_cost['w'] = $card_infos['w'];
+            }
+            if($heand_max_cost['cost'] < $card_infos['cost']  ){
+                $heand_max_cost['cost'] = $card_infos['cost'];
+            }
         }
        
     }
+    $return['can_cast_how_mutch'] = 0;
+    $return['cant_cast_how_mutch'] = 0;
+    $return['lands'] = $land_on_headn;
+
+    foreach ($cards as $key => $value) {
+        $castable = true;
+        
+        if((isset($value['r']) ? $value['r']:0) > (isset($land_sorcer['r']) ? $land_sorcer['r']:0)){ 
+            $castable = false;
+        }
+        if((isset($value['b']) ? $value['b']:0) >  (isset($land_sorcer['b']) ? $land_sorcer['b']:0)){
+            $castable = false;
+        }
+        if((isset($value['g']) ? $value['g']:0) > (isset($land_sorcer['g']) ? $land_sorcer['g']:0)){
+            $castable = false;
+        }
+        if((isset($value['u']) ? $value['u']:0) >  (isset($land_sorcer['u']) ? $land_sorcer['u']:0)){
+            $castable = false;
+        }
+        if((isset($value['w']) ? $value['w']:0) >  (isset($land_sorcer['w']) ? $land_sorcer['w']:0)){
+            $castable = false;
+        }
+        if( $land_on_headn <  (isset($land_sorcer['cost']) ? $land_sorcer['cost']:0)){
+            $castable = false;
+        }
+        if($castable == true){
+            $return['can_cast_how_mutch']++;
+        }else{
+            $return['cant_cast_how_mutch']++; 
+        }
+    }
+    return $return;
+   
 }
 
 
@@ -106,14 +221,17 @@ function get_color_lands($land){
         case '{B}':
             return 'b';
             break;
-        case '{R}':
-            return 'r';
+        case '{G}':
+            return 'g';
             break;
         case '{U}':
             return 'u';
             break;
     
         default:
+        echo "morreu \n";
+        var_dump($land);
+        die();
             return '';
             break;
     }
