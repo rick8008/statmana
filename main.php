@@ -14,14 +14,56 @@ include 'helpers/geraAlternativa.php';
 
 
 
-$url = "https://www.ligamagic.com.br/?view=dks/deck&id=1572279";
+$url = "https://www.ligamagic.com.br/?view=dks/deck&id=1552001";
+
+
+
+$basedir = getcwd();
+delete_files($basedir.'/allDecks');
+mkdir($basedir.'/allDecks');
+delete_files($basedir.'/allHeands');
+mkdir($basedir.'/allHeands');
+delete_files($basedir.'/tmp');
+mkdir($basedir.'/tmp');
 
 $deck = captura_deck($url);
 $estatistica = captura_estatisticas($deck);
 $possibilidades_land = determine_color_lands($estatistica);
 $index_decks = emula_deck($deck,$possibilidades_land,$estatistica);
 emulate_heand($index_decks);
+get_perfect_heand();
 
+
+
+function get_perfect_heand(){
+    $target = getcwd().'/allHeands';
+    $files = glob( $target . '*', GLOB_MARK ); //GLOB_MARK adds a slash to directories returned
+    var_dump($files);
+       die(); 
+    foreach( $files as $file ){
+
+       $json = file_get_contents($file)  ;
+       var_dump($file,$json);
+       die();    
+    }
+
+}
+
+
+
+function delete_files($target) {
+    if(is_dir($target)){
+        $files = glob( $target . '*', GLOB_MARK ); //GLOB_MARK adds a slash to directories returned
+
+        foreach( $files as $file ){
+            delete_files( $file );      
+        }
+
+        rmdir( $target );
+    } elseif(is_file($target)) {
+        unlink( $target );  
+    }
+}
 
 
 
