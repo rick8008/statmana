@@ -19,7 +19,7 @@ function determine_color_lands($estatistica){
     if($estatistica["devotion"]["w"] >= 1){
         $land_colors[] = ['cor'  => 'w', 'quantidade'=> 0 ];
     } 
-    $filename = 'tmp/'.count($land_colors).'color_'.$estatistica["lands"]."lands.txt";
+    $filename = 'tmp/id'.$GLOBALS['id'].".txt";
     file_put_contents($filename,'');
     recursive($land_colors, count($land_colors) - 1, $estatistica["lands"],$estatistica["lands"],$filename);
     return file_get_contents($filename);

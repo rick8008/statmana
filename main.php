@@ -7,15 +7,15 @@ include 'helpers/capturaEstatistica.php';
 include 'helpers/geraAlternativa.php';
 
 
-// fractius : https://www.ligamagic.com.br/?view=dks/deck&id=1572279
-// anje     : https://www.ligamagic.com.br/?view=dks/deck&id=1552001
+// fractius : https://www.ligamagic.com.br/?view=dks/deck&id=1608766
+// anje     : https://www.ligamagic.com.br/?view=dks/deck&id=1588698
 // gwyn     : https://www.ligamagic.com.br/?view=dks/deck&id=1552008
 // aminatou : https://www.ligamagic.com.br/?view=dks/deck&id=1436263
 
 
 
-$url = "https://www.ligamagic.com.br/?view=dks/deck&id=1552001";
-
+$url = "https://www.ligamagic.com.br/?view=dks/deck&id=1588698";
+$id = str_replace('https://www.ligamagic.com.br/?view=dks/deck&id=','',$url);
 
 
 $basedir = getcwd();
@@ -37,16 +37,33 @@ get_perfect_heand();
 
 function get_perfect_heand(){
     $target = getcwd().'/allHeands';
-    $files = glob( $target . '*', GLOB_MARK ); //GLOB_MARK adds a slash to directories returned
-    var_dump($files);
-       die(); 
+    $files = scandir($target);
+    $i = 0;
+    $media = [];
     foreach( $files as $file ){
-
-       $json = file_get_contents($file)  ;
-       var_dump($file,$json);
-       die();    
+        if($i>1){
+            $json = file_get_contents($target.'/'.$file)  ;
+            $re = '/\"(.*?)\":(.*?)\,/m';
+            preg_match_all($re, $json, $matches, PREG_SET_ORDER, 0);
+            $media[] = ['media'=>$matches[1][2],'file'=>$file];
+        }
+       $i++; 
     }
+    $maior = 0;
+    $key2 = 0;
+    foreach ($media as $key => $value) {
+        if($maior < $value['media']){
+            $maior= $value['media'];
+            $key2 = $key;
+        }
+    }
+    var_dump($media[$key2]['file']);
+    $sucesso = str_replace('heand_score_','',$media[$key2]['file']);
+    $sucesso = str_replace('.txt','',$sucesso);
+    $color = file_get_contents(getcwd().'/tmp/id'.$GLOBALS['id'].'.txt')  ;
+    $color = explode("\n",$color);
 
+    var_dump($color[$sucesso],$maior);
 }
 
 
